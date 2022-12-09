@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -28,13 +30,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     @Override
     public int process(List<Update> updates) {
-
         updates.forEach(update -> {
             logger.info("Processing update: {}", update);
             long chatId = update.message().chat().id();
             System.out.println("chat id [" + update.message().chat().id() + "]");
             SendResponse response = telegramBot.execute(new SendMessage(chatId, "Hello!"));
             SendResponse response1 = telegramBot.execute(new SendMessage(chatId, "garold!"));
+            LocalDateTime.parse("01.01.2022 20:00", DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
