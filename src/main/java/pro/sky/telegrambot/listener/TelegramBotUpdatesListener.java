@@ -42,10 +42,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
             System.out.println("chat id [" + update.message().chat().id() + "]");
             SendResponse response = telegramBot.execute(new SendMessage(chatId, "Hello!"));
-
             TelegramBotEntity bot = new TelegramBotEntity();
 
             telegramBotRepository.save(bot);
+
 
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
