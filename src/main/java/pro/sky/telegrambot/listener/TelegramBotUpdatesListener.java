@@ -9,14 +9,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambot.entity.TelegramBotEntity;
+import pro.sky.telegrambot.repository.TelegramBotRepository;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
+    private final TelegramBotRepository telegramBotRepository;
+
+    public TelegramBotUpdatesListener(TelegramBotRepository telegramBotRepository) {
+        this.telegramBotRepository = telegramBotRepository;
+    }
 
     private Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
@@ -32,14 +37,19 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     public int process(List<Update> updates) {
         updates.forEach(update -> {
             logger.info("Processing update: {}", update);
+
             long chatId = update.message().chat().id();
+
             System.out.println("chat id [" + update.message().chat().id() + "]");
             SendResponse response = telegramBot.execute(new SendMessage(chatId, "Hello!"));
-            SendResponse response1 = telegramBot.execute(new SendMessage(chatId, "garold!"));
-            LocalDateTime.parse("01.01.2022 20:00", DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+
+            TelegramBotEntity bot = new TelegramBotEntity();
+
+            telegramBotRepository.save(bot);
 
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
+
 
 }
