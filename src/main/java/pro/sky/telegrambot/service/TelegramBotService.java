@@ -24,4 +24,10 @@ public class TelegramBotService {
 
     }
 
+    //@Scheduled(fixedDelay = 1_000L)
+    public List<TelegramBotEntity> message() {
+        return telegramBotRepozitor.message();
+
+    }
+
 }

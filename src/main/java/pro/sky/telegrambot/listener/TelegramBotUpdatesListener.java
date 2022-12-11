@@ -13,7 +13,9 @@ import pro.sky.telegrambot.entity.TelegramBotEntity;
 import pro.sky.telegrambot.repository.TelegramBotRepository;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
@@ -37,13 +39,17 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     public int process(List<Update> updates) {
         updates.forEach(update -> {
             logger.info("Processing update: {}", update);
-
             long chatId = update.message().chat().id();
-
-            System.out.println("chat id [" + update.message().chat().id() + "]");
-            SendResponse response = telegramBot.execute(new SendMessage(chatId, "Hello!"));
+            if (Objects.equals(update.message().text(), "/start")) {
+                SendResponse response = telegramBot.execute(new SendMessage(chatId, "Hello!"));
+            }
             TelegramBotEntity bot = new TelegramBotEntity();
-
+            long idChat = update.message().chat().id();
+            String message = update.message().text();
+            LocalDateTime dateTime = LocalDateTime.now();
+            bot.setIdChat(idChat);
+            bot.setMessage(message);
+            bot.setDateTime(dateTime);
             telegramBotRepository.save(bot);
 
 

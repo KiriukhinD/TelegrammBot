@@ -27,4 +27,9 @@ public class TelegramBotController {
         return telegramBotService.allBot();
     }
 
+    @GetMapping("/message")
+    public List<TelegramBotEntity> message() {
+        return telegramBotService.message();
+    }
+
 }

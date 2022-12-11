@@ -15,8 +15,15 @@ public class TelegramBotEntity {
     private long idChat;
     private String message;
 
-    private LocalDateTime dateTime = LocalDateTime.now();
+    private LocalDateTime dateTime;
 
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
+    }
 
     public long getId() {
         return id;
@@ -42,7 +49,6 @@ public class TelegramBotEntity {
     public void setIdChat(long idChat) {
         this.idChat = idChat;
     }
-
 
     @Override
     public boolean equals(Object o) {
