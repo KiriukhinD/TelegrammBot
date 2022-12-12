@@ -8,12 +8,14 @@ import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambot.entity.TelegramBotEntity;
 import pro.sky.telegrambot.repository.TelegramBotRepository;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
@@ -51,10 +53,24 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             bot.setMessage(message);
             bot.setDateTime(dateTime);
             telegramBotRepository.save(bot);
-
-
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
+    }
+
+    @Scheduled(fixedDelay = 10_000L)
+    public void otpravka() {
+        LocalDateTime time = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
+        List<TelegramBotEntity> repozit = telegramBotRepository.findByDateTime(time);
+        System.out.println(time);
+        for (TelegramBotEntity bot : repozit) {
+            System.out.println(bot);
+            if (bot != null && Objects.equals(bot.getMessage(), "/date")) {
+                logger.info("Notification with id = {} was sent", bot.getId());
+                SendResponse response = telegramBot.execute(new SendMessage(bot.getIdChat(), "отправка из другого метода!"));
+
+            }
+        }
+
     }
 
 
