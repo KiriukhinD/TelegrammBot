@@ -15,9 +15,13 @@ import pro.sky.telegrambot.repository.TelegramBotRepository;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
@@ -41,30 +45,57 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     public int process(List<Update> updates) {
         updates.forEach(update -> {
             logger.info("Processing update: {}", update);
-            long chatId = update.message().chat().id();
-            if (Objects.equals(update.message().text(), "/start")) {
-                SendResponse response = telegramBot.execute(new SendMessage(chatId, "Hello!"));
-            }
+
             TelegramBotEntity bot = new TelegramBotEntity();
+
             long idChat = update.message().chat().id();
             String message = update.message().text();
-            LocalDateTime dateTime = LocalDateTime.now();
+            String messageFinal;
+
+            Pattern pattern = Pattern.compile("([0-9\\.\\:\\s]{16})(\\s)([\\W+]+)");
+            Matcher matcher = pattern.matcher(message);
+
+            String dateReposit = null;
+            String messageRepozit;
+            if (matcher.matches()) {
+                dateReposit = matcher.group(1);
+                messageRepozit = matcher.group(3);
+                messageFinal = messageRepozit;
+                SendResponse response = telegramBot.execute(new SendMessage(idChat, "корректные даные"));
+            } else {
+                logger.warn("Incorrect message [no correct]");
+                if (message != dateReposit) {
+                    SendResponse response = telegramBot.execute(new SendMessage(idChat, "не коректные данные"));
+                }
+                return;
+            }
+
+            LocalDateTime dateTime = LocalDateTime.parse(dateReposit, DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+
             bot.setIdChat(idChat);
-            bot.setMessage(message);
+            bot.setMessage(messageFinal);
             bot.setDateTime(dateTime);
             telegramBotRepository.save(bot);
+
+
+            if (Objects.equals(update.message().text(), "/start")) {
+                SendResponse response = telegramBot.execute(new SendMessage(idChat, "Hello!"));
+            }
+
+
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
 
-    @Scheduled(fixedDelay = 10_000L)
+    @Scheduled(cron = "0 0/1 * * * *")
     public void otpravka() {
         LocalDateTime time = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         List<TelegramBotEntity> repozit = telegramBotRepository.findByDateTime(time);
         System.out.println(time);
+
         for (TelegramBotEntity bot : repozit) {
             System.out.println(bot);
-            if (bot != null && Objects.equals(bot.getMessage(), "/date")) {
+            if (bot != null) {
                 logger.info("Notification with id = {} was sent", bot.getId());
                 SendResponse response = telegramBot.execute(new SendMessage(bot.getIdChat(), "отправка из другого метода!"));
 
